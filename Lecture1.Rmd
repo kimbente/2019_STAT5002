@@ -1,0 +1,275 @@
+---
+title: "Lecture 1 code"
+author: "Kevin Wang"
+date: "March 7, 2018"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+
+```{r setup, include=FALSE}
+
+#Create a code chunk called setup.
+#Do not include the code of this chunk or it's output in the final document.
+
+knitr::opts_chunk$set(echo = TRUE) #by default, print the code in the document.
+
+```
+
+
+# Lecture 1
+
+## Read in data
+
+Let's start by reading in some data...
+
+
+```{r readData}
+
+#read in data
+data <- read.csv("2016Fatalities.csv",header=T) 
+
+#Try the following too
+#data <- read.delim("2016Fatalities.csv",header=T,sep = ",") 
+
+
+```
+
+
+## Exploration
+
+Now lets get a feel for what our data looks like... 
+
+```{r explore}
+
+#get dimension of data
+dim(data)
+
+names(data) #Lists all the variables
+colnames(data)  #Lists all the variables
+
+data[1,]  #Extracts the 1st row
+head(data)  #List the 1st 6 rows of data, tail() the last 6
+
+class(data)  #Shows the way R has stored the data
+
+str(data)
+
+CLASS = NULL
+for(i in colnames(data)) CLASS[i] = class(data[,i]) 
+CLASS  #shows how the data are stored in each column of the dataframe
+```
+
+
+## Plots
+
+
+Have a look at Days of the week variable using a frequency table and ordinal plot.
+```{r dayofweek}
+DayWeek  =  data$Dayweek  #Extracts day of the week
+table(DayWeek)
+plot(table(DayWeek),las=2)
+```
+
+
+While we're at it, check out speed limit.
+```{r speedLimit}
+Speed <- data$SpeedLimit  #Extracts SpeedLimit
+table(Speed)
+plot(table(Speed))
+```
+
+
+
+We can generate a histogram of Age
+```{r Histograms}
+Age = data$Age
+min(Age)
+max(Age)
+
+hist(Age,xlab="Age",
+     main="Regular Histogram for Age of Fatality")
+
+breaks = c(-10,18,25,70,100) # This creates a vector that we will use to define the breaks
+table(cut(Age,breaks,right=F))   
+hist(Age,br=breaks,freq=F,right=F,
+     xlab="Age",
+   main="Probability Histogram for Age of Fatality")  
+
+
+hist(Age,br=breaks,freq=T, right=F, main ="Misleading Regular Histogram")
+```
+
+
+
+## Summation notation
+
+The answers to the 'try it yourself' page on summation notation.
+```{r summationNotation}
+#Check your answers
+x=c(1,4,6,2,3,7)
+y=c(sum(x), sum(x[2:5]^2), sum(c(1:6)*x), sum(sort(x)-1))
+y
+
+```
+
+
+## Mean and median
+
+We can find the mean and median using the following...
+
+```{r meanMedian}
+#Check your answers
+x=c(1,4,6,2,3,7)
+mean(x)
+median(x)
+```
+
+
+## Skewness
+
+```{r skew}
+
+# Set a seed to reproduce "random sampling" in the future
+set.seed(123)
+
+# Generate some data... We will learn about how to do this in two weeks
+x1=rnorm(1000)
+x2=-rgamma(1000,1,2)
+x3=rgamma(1000,1,2)
+
+
+#Make three histograms
+
+par(mfrow = c(3, 1)) #Creates a plotting window with 3 rows and 1 columns
+hist(x1,main="Symmetric",breaks = 20)
+abline(v = c(mean(x1),median(x1)),col = c(2,4)) # Draw vertical lines where the mean and median are that are red(2) and blue(4)... could use col=c('red','blue') instead.
+hist(x2,main="Left skewed",breaks = 20)
+abline(v = c(mean(x2),median(x2)),col = c(2,4))
+hist(x3,main="Right skewed",breaks = 20)
+abline(v = c(mean(x3),median(x3)),col = c(2,4))
+par(mfrow = c(1, 1))
+```
+
+We'll look at speed limit again...
+```{r Speed2}
+Speed <- data$SpeedLimit
+mean(Speed)
+median(Speed)
+hist(Speed,breaks = 20)
+abline(v = c(mean(Speed),median(Speed)),col = c(2,4))
+
+```
+
+## Multimodal data
+
+Data can have multiple modes...
+```{r Modality}
+x1=rnorm(1000)
+x2=c(rnorm(1000,25,6),rnorm(1000,100,4))
+x3=c(rnorm(1000,25,6),rnorm(1000,100,4), rnorm(1000,200,16))
+par(mfrow = c(1, 3))
+hist(x1,main="Unimodal")
+hist(x2,main="Bimodal")
+hist(x3,main="Trimodal")
+```
+
+
+## Spread
+
+Data can be centered in the same spot but have different spreads. 
+
+```{r spread}
+x1=rnorm(1000,0,1)
+x2=rnorm(1000,0,2)
+par(mfrow = c(1, 2)) 
+hist(x1,xlim = c(-6.5,6.5))
+hist(x2,xlim = c(-6.5,6.5))
+```
+
+
+We can calculate a few measures of spread.
+```{r robustSpread}
+
+x =  c(1,4,6,2,3,7)
+sd(x) #standard deviation of x
+
+fivenum(x) # The quantiles and min,max of x
+
+x2=c(1,4,6,2,3,7,8)
+fivenum(x2)
+
+
+fivenum(x)[4]-fivenum(x)[2] #IQR of x
+
+# IQR is more robust than sd
+x1=c(1,4,6,2,3,7,100)
+sd(x1)
+fivenum(x1)[4] - fivenum(x1)[2]
+```
+
+
+## Boxplots
+
+We can use boxplots to visualise the 5 number summary.
+```{r boxplot}
+
+fivenum(x)
+boxplot(x, horizontal=T, col="purple")
+
+#Boxplot of Age
+boxplot(Age,horizontal=T)
+
+
+#Split by men and women
+AgeM <- data$Age[ data$Gender == "Male"]
+AgeF <- data$Age[ data$Gender == "Female"]
+par(mfrow = c(1, 2))  #Puts 2 boxplots in a row
+boxplot(AgeM)
+boxplot(AgeF)
+
+par(mfrow = c(1, 1))
+#Alternatvely
+boxplot(Age~data$Gender, ylab="Age")
+
+#Or...
+boxplot(AgeM,AgeF, ylab="Age")
+
+
+```
+
+Boxplots can show us weird things about data
+```{r}
+boxplot(data$SpeedLimit, horizontal = T)
+```
+
+
+## Outliers
+
+We can identify outliers in the data by using arbitrary definitions
+```{r}
+
+Usyd <- read.csv("USyd.csv")
+heights1=c(Usyd$Heights[1:27],178) #add in an outlier
+iqr=fivenum(heights1)[4]-fivenum(heights1)[2]
+lt=fivenum(heights1)[2]-1.5*iqr
+ut=fivenum(heights1)[4]+1.5*iqr
+
+# 1.5 * IQR rule
+heights1[(heights1<lt) | (heights1 > ut)]   # | = 'or'
+
+# 3 * SD rule
+3*sd(heights1)  
+heights1[abs(heights1-mean(heights1))>3*sd(heights1)]
+```
+
+
+```{r transformation}
+w=c(1,2,3,4,10,30,60,120,180,300)
+w1=log(w,10)
+par(mfrow = c(1, 2))
+boxplot(w, main ="Data")
+boxplot(w1, main="Log of Data")
+```
+
